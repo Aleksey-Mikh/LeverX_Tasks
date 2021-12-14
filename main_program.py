@@ -1,5 +1,7 @@
-import json
 import argparse
+
+from converters_to_format import ConvertDataToJson, ConvertDataToXml
+from combiners import CombinerRoomsAndStudents
 
 
 class InitArgparse:
@@ -27,34 +29,27 @@ class Interface:
         self.path_to_student_file = parser.parse_result.students
         self.path_to_rooms_file = parser.parse_result.rooms
         self.output_type = parser.parse_result.format
+        self.result_list = []
+        self.convertor = None
 
+    def get_data(self):
+        combiner = CombinerRoomsAndStudents(self.path_to_student_file, self.path_to_rooms_file)
+        self.result_list = combiner.registration_students_to_rooms()
 
-class CombinerRoomsAndStudents:
+    def convert_to_format(self):
+        if self.output_type == "xml":
+            self.convertor = ConvertDataToXml(self.result_list)
+        elif self.output_type == "json":
+            self.convertor = ConvertDataToJson(self.result_list)
 
-    def __init__(
-            self,
-            path_to_student_file: str,
-            path_to_rooms_file: str,
-    ):
-        self.path_to_student_file = path_to_student_file
-        self.path_to_rooms_file = path_to_rooms_file
+        self.convertor.convert_to_format()
 
-    def registration_students_to_rooms(self):
-        list_of_students = self.open_file(self.path_to_student_file)
-        list_of_rooms = self.open_file(self.path_to_rooms_file)
-
-        for student in list_of_students:
-            room = list_of_rooms[student["room"]]
-            students_in_room = room.setdefault("students", [])
-            students_in_room.append(student)
-        return list_of_rooms
-
-    @staticmethod
-    def open_file(path_to_file: str):
-        with open(path_to_file) as file:
-            data = json.load(file)
-        return data
+    def write_to_file(self):
+        self.convertor.write_to_file()
 
 
 if __name__ == '__main__':
-    Interface()
+    inter = Interface()
+    inter.get_data()
+    inter.convert_to_format()
+    inter.write_to_file()
