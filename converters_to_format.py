@@ -98,4 +98,4 @@ class ConvertDataToXml(AbstractConvertData):
         Method for writing data to a XML file
         """
         tree = xml.ElementTree(self.root)
-        tree.write("sample.xml")
+        tree.write("result.xml")
