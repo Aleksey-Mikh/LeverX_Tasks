@@ -5,6 +5,9 @@ from combiners import CombinerRoomsAndStudents
 
 
 class InitArgparse:
+    """
+    Class that initializes argparse to work with the console
+    """
 
     allowed_output_types = ["json", "xml"]
 
@@ -12,6 +15,9 @@ class InitArgparse:
         self.parse_result = self._parse_args()
 
     def _parse_args(self):
+        """
+        Get arguments from the console
+        """
         parser = argparse.ArgumentParser(
             description="A script that combines students and the rooms they should be in"
         )
@@ -23,29 +29,47 @@ class InitArgparse:
 
 
 class Interface:
+    """
+    Interface that connects a class to receive arguments
+    with a class that processes data and sends the received data
+    to classes that convert data to a specified format
+    """
 
     def __init__(self):
+        """
+        Method that calls Init Arg parse to get
+        the necessary arguments and sets internal variables
+        """
         parser = InitArgparse()
         self.path_to_student_file = parser.parse_result.students
         self.path_to_rooms_file = parser.parse_result.rooms
         self.output_type = parser.parse_result.format
-        self.result_list = []
-        self.convertor = None
+        self._result_data = []
+        self._convertor = None
 
     def get_data(self):
+        """
+        Get a list with registered students in rooms
+        """
         combiner = CombinerRoomsAndStudents(self.path_to_student_file, self.path_to_rooms_file)
-        self.result_list = combiner.registration_students_to_rooms()
+        self._result_data = combiner.registration_students_to_rooms()
 
     def convert_to_format(self):
+        """
+        Call classes to convert data to a format
+        """
         if self.output_type == "xml":
-            self.convertor = ConvertDataToXml(self.result_list)
+            self._convertor = ConvertDataToXml(self._result_data)
         elif self.output_type == "json":
-            self.convertor = ConvertDataToJson(self.result_list)
+            self._convertor = ConvertDataToJson(self._result_data)
 
-        self.convertor.convert_to_format()
+        self._convertor.convert_to_format()
 
     def write_to_file(self):
-        self.convertor.write_to_file()
+        """
+        Call the method to write the converted data to a file
+        """
+        self._convertor.write_to_file()
 
 
 if __name__ == '__main__':
